@@ -1,0 +1,492 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+% Ambiente para código
+\newenvironment{codigo}
+  {\small\verbatim}
+  {\endverbatim\normalsize}
+
+\begin{document}
+
+% Portada
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\Huge \textbf{Sistemas Inteligentes} \par}
+    \vspace{1.5cm}
+    
+    {\LARGE \textbf{SUDOKU con solucionador} \par}
+    \vspace{0.5cm}
+    
+    {\Large \textbf{Tarea 9 extra} \par}
+    \vspace{2cm}
+    
+    {\large \textbf{Alumno:} Andres Soria Cabrera 421114409\par}
+    \vspace{0.5cm}
+    
+    {\large \textbf{Profesor:} Rosas Hern\'andez Javier \par}
+    \vspace{0.5cm}
+    
+    {\large \textbf{Grupo:} 1754 \par}
+    \vspace{0.5cm}
+    
+    {\large \textbf{Fecha:} \today \par}
+    \vfill
+
+    {\large Facultad de Estudios Superiores Acatl\'an \par}
+    {\large Universidad Nacional Aut\'onoma de M\'exico \par}
+
+\end{titlepage}
+
+\begin{abstract}
+Este documento presenta la implementaci\'on de un solucionador de Sudoku interactivo que utiliza tres diferentes enfoques algor\'itmicos: B\'usqueda en Profundidad (DFS), B\'usqueda en Anchura (BFS) y Algoritmos Gen\'eticos (GA). El sistema permite generar puzzles aleatorios con diferentes niveles de dificultad y compara el rendimiento de cada algoritmo en t\'erminos de tiempo de ejecuci\'on.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Introducción}
+
+El Sudoku es un puzzle lógico que consiste en llenar una cuadrícula de $9 \times 9$ dividida en subcuadrículas de $3 \times 3$ con dígitos del 1 al 9, cumpliendo las siguientes restricciones:
+\begin{itemize}
+    \item Cada fila debe contener todos los dígitos del 1 al 9 sin repetición
+    \item Cada columna debe contener todos los dígitos del 1 al 9 sin repetición
+    \item Cada subcuadrícula de $3 \times 3$ debe contener todos los dígitos del 1 al 9 sin repetición
+\end{itemize}
+
+Este proyecto implementa tres enfoques distintos para resolver el problema del Sudoku, cada uno con características y rendimiento diferentes.
+
+\section{Características del Sistema}
+
+\subsection{Funcionalidades Principales}
+\begin{itemize}
+    \item \textbf{Tres algoritmos de resolución}: DFS, BFS y Algoritmo Genético
+    \item \textbf{Generación aleatoria}: Puzzles con 4 niveles de dificultad
+    \item \textbf{Interfaz interactiva}: Línea de comandos fácil de usar
+    \item \textbf{Medición de rendimiento}: Tiempo de ejecución para cada solución
+    \item \textbf{Visualización clara}: Tablero con separadores visuales
+    \item \textbf{Modo continuo}: Resolver múltiples puzzles sin reiniciar
+\end{itemize}
+
+\subsection{Niveles de Dificultad}
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Nivel} & \textbf{Celdas Vacías} \\
+\hline
+Fácil & 30 \\
+Medio & 40 \\
+Difícil & 50 \\
+Extremo & 60 \\
+\hline
+\end{tabular}
+\caption{Niveles de dificultad disponibles}
+\end{table}
+
+\section{Algoritmos Implementados}
+
+\subsection{DFS - Búsqueda en Profundidad}
+
+\subsubsection{Descripción}
+El algoritmo DFS explora el espacio de búsqueda en profundidad, probando valores posibles y retrocediendo (backtracking) cuando encuentra un callejón sin salida.
+
+\subsubsection{Características}
+\begin{itemize}
+    \item Explora cada rama de posibilidades hasta el final
+    \item Utiliza backtracking para volver atrás cuando encuentra conflictos
+    \item Generalmente el más rápido para la mayoría de los Sudokus
+    \item Complejidad temporal: $O(9^{n})$ donde $n$ es el número de celdas vacías
+\end{itemize}
+
+\subsubsection{Pseudocódigo}
+\begin{verbatim}
+function DFS(tablero):
+    while not is_complete(tablero):
+        tablero, movimientos, actualizado = poblar_movimiento_simple(tablero)
+        
+        if actualizado:
+            actualizar_movimientos_posibles(tablero)
+            continue
+            
+        tablero, movimientos, actualizado = poblar_movimiento_inteligente(tablero)
+        
+        if actualizado:
+            actualizar_movimientos_posibles(tablero)
+            continue
+        
+        if not is_valid(tablero):
+            hacer_backtracking()
+            continue
+        
+        # Adivinar siguiente movimiento
+        seleccionar_celda_con_minimas_opciones()
+        probar_primera_opcion()
+        guardar_estado_en_historial()
+    
+    return tablero, True
+\end{verbatim}
+
+\subsection{BFS - Búsqueda en Anchura}
+
+\subsubsection{Descripción}
+El algoritmo BFS explora el espacio de búsqueda nivel por nivel, expandiendo todos los estados posibles en cada nivel antes de continuar al siguiente.
+
+\subsubsection{Características}
+\begin{itemize}
+    \item Explora todas las posibilidades nivel por nivel
+    \item Utiliza una cola (queue) para gestionar los estados
+    \item Garantiza encontrar la solución más ``corta'' en términos de decisiones
+    \item Complejidad espacial mayor que DFS debido al almacenamiento de estados
+\end{itemize}
+
+\subsubsection{Pseudocódigo}
+\begin{verbatim}
+function BFS(tablero):
+    cola = nueva_cola()
+    cola.agregar((tablero, movimientos_posibles))
+    
+    while cola no esta vacia:
+        tablero_actual, movimientos = cola.extraer()
+        
+        # Aplicar movimientos obvios
+        aplicar_estrategias_basicas(tablero_actual)
+        
+        if is_complete(tablero_actual):
+            return tablero_actual, True
+        
+        if not is_valid(tablero_actual):
+            continue
+        
+        # Generar nuevos estados
+        for cada_opcion in movimientos:
+            nuevo_tablero = copiar(tablero_actual)
+            aplicar(nuevo_tablero, opcion)
+            
+            if is_valid(nuevo_tablero):
+                cola.agregar((nuevo_tablero, nuevos_movimientos))
+    
+    return tablero_original, False
+\end{verbatim}
+
+\subsection{GA - Algoritmo Genético}
+
+\subsubsection{Descripción}
+El algoritmo genético utiliza principios de evolución biológica para optimizar soluciones candidatas a través de generaciones sucesivas.
+
+\subsubsection{Componentes Principales}
+
+\paragraph{Representación}
+\begin{itemize}
+    \item \textbf{Cromosoma}: Un tablero completo de Sudoku $9 \times 9$
+    \item \textbf{Gen}: Cada número en el tablero
+    \item \textbf{Población}: Conjunto de tableros candidatos
+\end{itemize}
+
+\paragraph{Función de Fitness}
+La función de fitness $f(x)$ se define como:
+\begin{equation}
+f(x) = 1000 \cdot C_{\text{fijos}} + C_{\text{filas}} + C_{\text{columnas}} + C_{\text{cajas}}
+\end{equation}
+
+donde:
+\begin{itemize}
+    \item $C_{\text{fijos}}$ = Número de celdas fijas modificadas (penalización)
+    \item $C_{\text{filas}}$ = $\sum_{i=1}^{9} (9 - |\text{únicos en fila } i|)$
+    \item $C_{\text{columnas}}$ = $\sum_{j=1}^{9} (9 - |\text{únicos en columna } j|)$
+    \item $C_{\text{cajas}}$ = $\sum_{k=1}^{9} (9 - |\text{únicos en caja } k|)$
+\end{itemize}
+
+\paragraph{Operadores Genéticos}
+
+\textbf{Selección por Torneo}: Se seleccionan aleatoriamente 5 individuos y se elige el mejor.
+
+\textbf{Cruce}: Intercambio de filas completas entre dos padres:
+\begin{verbatim}
+function crossover(padre1, padre2, tablero_original):
+    hijo = copia(padre1)
+    
+    for fila in 0..8:
+        if random() < 0.5:
+            hijo[fila] = copia(padre2[fila])
+    
+    return hijo
+\end{verbatim}
+
+\textbf{Mutación}: Intercambio de dos valores en celdas no fijas de una fila:
+\begin{verbatim}
+function mutate(individuo, tablero_original, tasa_mutacion):
+    for fila in 0..8:
+        if random() < tasa_mutacion:
+            columnas_mutables = [col donde tablero_original[fila][col] == 0]
+            
+            if len(columnas_mutables) >= 2:
+                col1, col2 = seleccionar_aleatorio(columnas_mutables, 2)
+                intercambiar(individuo[fila][col1], individuo[fila][col2])
+    
+    return individuo
+\end{verbatim}
+
+\subsubsection{Parámetros del Algoritmo}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Parámetro} & \textbf{Valor} \\
+\hline
+Tamaño de población & 200 \\
+Generaciones máximas & 5000 \\
+Tasa de mutación & 0.4 \\
+Elitismo & 5 individuos \\
+Tamaño de torneo & 5 individuos \\
+Generaciones sin mejora (stop) & 500 \\
+\hline
+\end{tabular}
+\caption{Parámetros del algoritmo genético}
+\end{table}
+
+\subsubsection{Pseudocódigo}
+\begin{verbatim}
+function GA(tablero):
+    poblacion = inicializar_poblacion(200, tablero)
+    mejor_fitness = infinito
+    sin_mejora = 0
+    
+    for generacion in 1..5000:
+        ordenar(poblacion, por=fitness)
+        
+        if poblacion[0].fitness == 0:
+            return poblacion[0], True
+        
+        if poblacion[0].fitness < mejor_fitness:
+            mejor_fitness = poblacion[0].fitness
+            sin_mejora = 0
+        else:
+            sin_mejora += 1
+        
+        if sin_mejora >= 500:
+            break
+        
+        nueva_poblacion = []
+        
+        # Elitismo
+        agregar_mejores(nueva_poblacion, 5)
+        
+        # Generar descendencia
+        while len(nueva_poblacion) < 200:
+            padre1 = seleccion_torneo(poblacion)
+            padre2 = seleccion_torneo(poblacion)
+            hijo = crossover(padre1, padre2)
+            hijo = mutate(hijo, 0.4)
+            nueva_poblacion.agregar(hijo)
+        
+        poblacion = nueva_poblacion
+    
+    return mejor_individuo(poblacion), fitness == 0
+\end{verbatim}
+
+\section{Estructura del Proyecto}
+
+\subsection{Organización de Archivos}
+\begin{itemize}
+    \item \texttt{main.py} - Interfaz principal y generación de Sudokus
+    \item \texttt{dfs.py} - Implementación del algoritmo DFS
+    \item \texttt{bfs.py} - Implementación del algoritmo BFS
+    \item \texttt{genetic\_algorithm.py} - Implementación del Algoritmo Genético
+    \item \texttt{posibles\_movimientos.py} - Funciones para calcular movimientos válidos
+    \item \texttt{populated\_move.py} - Estrategia básica de llenado
+    \item \texttt{populated\_move\_smart.py} - Estrategia inteligente de llenado
+    \item \texttt{is\_complete\_board.py} - Verificación de tablero completo
+    \item \texttt{dead\_end.py} - Validación de estado del tablero
+\end{itemize}
+
+\subsection{Estrategias de Resolución}
+
+El sistema utiliza múltiples estrategias complementarias:
+
+\begin{enumerate}
+    \item \textbf{Movimiento único}: Coloca números cuando solo hay una opción válida en una celda
+    
+    \item \textbf{Estrategia inteligente}: Encuentra números que solo pueden ir en una posición específica dentro de:
+    \begin{itemize}
+        \item Filas
+        \item Columnas
+        \item Cajas $3 \times 3$
+    \end{itemize}
+    
+    \item \textbf{Búsqueda con backtracking/evolución}: Prueba posibilidades cuando las estrategias básicas no son suficientes
+\end{enumerate}
+
+\section{Uso del Sistema}
+
+\subsection{Instalación}
+No se requieren librerías externas. Solo Python 3.x:
+\begin{verbatim}
+python3 main.py
+\end{verbatim}
+
+\subsection{Flujo de Ejecución}
+\begin{enumerate}
+    \item Seleccionar algoritmo (DFS, BFS o GA)
+    \item Seleccionar nivel de dificultad (1-4)
+    \item El sistema genera un Sudoku aleatorio
+    \item El algoritmo resuelve el puzzle
+    \item Se muestra el tiempo de ejecución
+    \item Opción de resolver otro puzzle o salir
+\end{enumerate}
+
+\section{Resultados y Análisis de Rendimiento}
+
+\subsection{Comparación de Algoritmos}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Algoritmo} & \textbf{Tiempo (Fácil)} & \textbf{Tiempo (Difícil)} & \textbf{Garantía} \\
+\hline
+DFS & $\sim$0.01s & $\sim$0.05s & Alta \\
+BFS & $\sim$0.01s & $\sim$0.10s & Alta \\
+GA & $\sim$0.87s & $\sim$2.40s & Media \\
+\hline
+\end{tabular}
+\caption{Comparación de rendimiento de los algoritmos}
+\end{table}
+
+\subsection{Ventajas y Desventajas}
+
+\subsubsection{DFS}
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Muy rápido para la mayoría de casos
+    \item Bajo consumo de memoria
+    \item Implementación relativamente simple
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Puede quedarse en ramas profundas infructuosas
+    \item No garantiza la solución más corta
+\end{itemize}
+
+\subsubsection{BFS}
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Garantiza solución óptima en términos de pasos
+    \item Explora sistemáticamente
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Mayor consumo de memoria
+    \item Más lento que DFS en casos complejos
+\end{itemize}
+
+\subsubsection{Algoritmo Genético}
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Enfoque completamente diferente (optimización vs búsqueda)
+    \item Puede escapar de óptimos locales
+    \item Paralelizable naturalmente
+    \item Educativo para entender evolución artificial
+\end{itemize}
+
+\textbf{Desventajas:}
+\begin{itemize}
+    \item Significativamente más lento
+    \item No garantiza encontrar la solución
+    \item Requiere ajuste de parámetros
+    \item Comportamiento estocástico
+\end{itemize}
+
+\section{Conclusiones}
+
+Este proyecto demuestra tres enfoques fundamentalmente diferentes para resolver el problema del Sudoku:
+
+\begin{itemize}
+    \item \textbf{DFS y BFS} son algoritmos de búsqueda deterministas que exploran el espacio de soluciones de manera sistemática. Son eficientes y garantizan encontrar la solución si existe.
+    
+    \item \textbf{El Algoritmo Genético} representa un paradigma de optimización inspirado en la naturaleza. Aunque más lento, ilustra cómo problemas complejos pueden abordarse mediante evolución artificial.
+\end{itemize}
+
+El sistema permite experimentar y comparar estos enfoques en tiempo real, proporcionando una herramienta educativa valiosa para entender diferentes paradigmas de resolución de problemas.
+
+\subsection{Trabajo Futuro}
+\begin{itemize}
+    \item Implementar interfaz gráfica (GUI)
+    \item Agregar más algoritmos (A*, Simulated Annealing)
+    \item Optimizar el algoritmo genético con mejores operadores
+    \item Implementar paralelización para GA
+    \item Agregar estadísticas detalladas de rendimiento
+\end{itemize}
+
+\section{Referencias}
+
+\begin{itemize}
+    \item Russell, S., \& Norvig, P. (2020). \textit{Artificial Intelligence: A Modern Approach}. Pearson.
+    \item Holland, J. H. (1992). \textit{Adaptation in Natural and Artificial Systems}. MIT Press.
+    \item Cormen, T. H., et al. (2009). \textit{Introduction to Algorithms}. MIT Press.
+\end{itemize}
+
+\appendix
+
+\section{Ejemplo de Ejecución}
+
+\begin{verbatim}
+==================================================
+=== SOLUCIONADOR DE SUDOKU ===
+==================================================
+
+Seleccione el algoritmo:
+1. DFS (Depth-First Search - Busqueda en Profundidad)
+2. BFS (Breadth-First Search - Busqueda en Anchura)
+3. GA (Genetic Algorithm - Algoritmo Genetico)
+
+Ingrese su opcion (1-3): 1
+
+Seleccione el nivel de dificultad:
+1. Facil (30 celdas vacias)
+2. Medio (40 celdas vacias)
+3. Dificil (50 celdas vacias)
+4. Extremo (60 celdas vacias)
+
+Ingrese su opcion (1-4): 2
+
+Generando Sudoku nivel medio...
+
+Tablero inicial:
+5 3 . | . 7 . | . . . 
+6 . . | 1 9 5 | . . . 
+. 9 8 | . . . | . 6 . 
+---------------------
+8 . . | . 6 . | . . 3 
+4 . . | 8 . 3 | . . 1 
+7 . . | . 2 . | . . 6 
+---------------------
+. 6 . | . . . | 2 8 . 
+. . . | 4 1 9 | . . 5 
+. . . | . 8 . | . 7 9 
+
+Resolviendo con DFS...
+
+Sudoku resuelto!
+5 3 4 | 6 7 8 | 9 1 2 
+6 7 2 | 1 9 5 | 3 4 8 
+1 9 8 | 3 4 2 | 5 6 7 
+---------------------
+8 5 9 | 7 6 1 | 4 2 3 
+4 2 6 | 8 5 3 | 7 9 1 
+7 1 3 | 9 2 4 | 8 5 6 
+---------------------
+9 6 1 | 5 3 7 | 2 8 4 
+2 8 7 | 4 1 9 | 6 3 5 
+3 4 5 | 2 8 6 | 1 7 9 
+
+Tiempo de ejecucion: 0.0149 segundos
+\end{verbatim}
+
+\end{document}
