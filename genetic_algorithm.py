@@ -53,13 +53,23 @@ def create_individual(original_board: List[List[int]]) -> List[List[int]]:
 
 def crossover(parent1: List[List[int]], parent2: List[List[int]], 
               original_board: List[List[int]]) -> List[List[int]]:
-    """Realiza cruce de dos padres intercambiando filas completas"""
+    """Realiza cruce de dos padres intercambiando filas completas manteniendo invariantes"""
     child = deepcopy(parent1)
     
-    # Intercambiar algunas filas del padre 2
+    # Intercambiar filas completas del padre 2 (esto mantiene la propiedad de números únicos por fila)
     for row_idx in range(9):
         if random.random() < 0.5:
-            child[row_idx] = deepcopy(parent2[row_idx])
+            # Verificar que la fila del padre2 respeta los números fijos
+            row_valid = True
+            for col_idx in range(9):
+                if original_board[row_idx][col_idx] != 0:
+                    if parent2[row_idx][col_idx] != original_board[row_idx][col_idx]:
+                        row_valid = False
+                        break
+            
+            # Solo copiar la fila si respeta los números fijos
+            if row_valid:
+                child[row_idx] = deepcopy(parent2[row_idx])
     
     return child
 

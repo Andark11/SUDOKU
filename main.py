@@ -129,6 +129,13 @@ def main():
         
         print("Tablero inicial:")
         print_board(board)
+        
+        # Advertencia para GA en nivel extremo
+        if algorithm == 'ga' and difficulty == 'extremo':
+            print("\n⚠️  Advertencia: El Algoritmo Genético puede tomar mucho tiempo")
+            print("    o no encontrar la solución en puzzles extremos.")
+            print("    Se recomienda usar DFS o BFS para este nivel.\n")
+        
         print(f"\nResolviendo con {algorithm.upper()}...\n")
         
         start_time = time.time()
@@ -146,8 +153,13 @@ def main():
             print_board(solved_board)
             print(f"\nTiempo de ejecución: {elapsed_time:.4f} segundos")
         else:
-            print("No se pudo resolver el Sudoku")
-            print_board(solved_board)
+            if algorithm == 'ga':
+                print("No se encontró la solución exacta")
+                print("El Algoritmo Genético no pudo converger a la solución correcta.")
+                print("Nota: GA tiene limitaciones con puzzles muy difíciles.")
+            else:
+                print("No se pudo resolver el Sudoku")
+                print_board(solved_board)
             print(f"\nTiempo de ejecución: {elapsed_time:.4f} segundos")
         
         # Preguntar si quiere continuar
