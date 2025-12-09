@@ -404,6 +404,55 @@ GA & $\sim$0.87s & $\sim$2.40s & Media \\
     \item No garantiza encontrar la solución
     \item Requiere ajuste de parámetros
     \item Comportamiento estocástico
+    \item Limitaciones con puzzles de alta dificultad (extremo)
+\end{itemize}
+
+\subsection{Limitaciones Identificadas del Algoritmo Genético}
+
+Durante las pruebas exhaustivas del sistema, se identificaron limitaciones importantes del Algoritmo Genético:
+
+\subsubsection{Rendimiento en Dificultad Extrema}
+El algoritmo genético presenta dificultades significativas con puzzles de nivel extremo (60 celdas vacías):
+
+\begin{itemize}
+    \item \textbf{Tiempo de ejecución}: 20-26+ segundos vs 0.01-1.5s de DFS/BFS
+    \item \textbf{Tasa de éxito}: Aproximadamente 20\% en nivel extremo vs 100\% para DFS/BFS
+    \item \textbf{Convergencia}: Frecuentemente alcanza el límite de 5000 generaciones sin encontrar la solución
+    \item \textbf{Óptimos locales}: Tiende a estancarse en tableros válidos pero incorrectos
+\end{itemize}
+
+\subsubsection{Soluciones Implementadas}
+
+Para mejorar la experiencia del usuario y gestionar expectativas, se implementaron las siguientes medidas:
+
+\paragraph{Advertencia Preventiva}
+El sistema ahora muestra una advertencia cuando el usuario selecciona GA en dificultad extrema:
+
+\begin{verbatim}
+ADVERTENCIA: El Algoritmo Genético puede tomar 
+mucho tiempo o no encontrar la solución en puzzles 
+extremos. Se recomienda usar DFS o BFS para este nivel.
+\end{verbatim}
+
+\paragraph{Mensajes de Error Mejorados}
+Cuando GA no encuentra la solución, se proporciona retroalimentación clara:
+
+\begin{verbatim}
+No se encontró la solución exacta
+El Algoritmo Genético no pudo converger a la 
+solución correcta.
+Nota: GA tiene limitaciones con puzzles muy difíciles.
+\end{verbatim}
+
+\subsubsection{Recomendaciones de Uso}
+
+Basándose en las pruebas realizadas, se recomienda:
+
+\begin{itemize}
+    \item \textbf{Nivel Fácil}: GA funciona bien (0.6-0.9s, alta tasa de éxito)
+    \item \textbf{Nivel Medio}: GA aceptable (1.5-3s, tasa de éxito moderada)
+    \item \textbf{Nivel Difícil}: Preferir DFS/BFS (GA: 20+ segundos, baja confiabilidad)
+    \item \textbf{Nivel Extremo}: Usar exclusivamente DFS o BFS (GA: muy baja tasa de éxito)
 \end{itemize}
 
 \section{Conclusiones}
